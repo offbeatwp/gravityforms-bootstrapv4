@@ -119,7 +119,9 @@ class Service extends AbstractService
 
     public static function buttonClassFrontend($button, $form)
     {
-        $button = preg_replace("/class='([\.a-zA-Z_ -]+)'/", "class='$1 btn " . $form['button']['class']. "'", $button);
+        if (isset($form['button']) && isset($form['button']['class']) && !empty($form['button']['class']) ) {
+            $button = preg_replace("/class='([\.a-zA-Z_ -]+)'/", "class='$1 btn " . $form['button']['class']. "'", $button);
+        }
 
         return $button;
 
