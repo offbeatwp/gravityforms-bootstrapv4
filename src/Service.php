@@ -8,6 +8,13 @@ class Service extends AbstractService
 {
     public function register(View $view)
     {
+        add_filter('gform_get_form_filter', [$this, 'bootstrapClasses'], 10, 2);
+        add_filter('gform_field_container', [$this, 'bootstrapContainer'], 10, 6);
+        add_filter('gform_field_content', [$this, 'fieldBootstrapClasses'], 10, 5);
+
+        add_filter('gform_submit_button', [$this, 'buttonClassFrontend'], 10, 2);
+        add_filter('gform_submit_button', [$this, 'inputToButton'], 10, 2);
+
         if (is_admin()) {
             add_action('gform_field_appearance_settings', [$this, 'customFields']);
             add_action('gform_editor_js', [$this, 'customFieldSizes']);
@@ -112,20 +119,9 @@ class Service extends AbstractService
 
     public static function buttonClassFrontend($button, $form)
     {
-        preg_match("/class='[\.a-zA-Z_ -]+'/", $button, $classes);
-        $classes[0] = substr($classes[0], 0, -1);
-        $classes[0] .= ' ';
-        $classes[0] .= esc_attr($form['button']['class']);
-        $classes[0] .= "'";
+        $button = preg_replace("/class='([\.a-zA-Z_ -]+)'/", "class='$1 btn " . $form['button']['class']. "'", $button);
 
-        $button_pieces = preg_split(
-            "/class='[\.a-zA-Z_ -]+'/",
-            $button,
-            -1,
-            PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
-        );
-
-        return $button_pieces[0] . $classes[0] . $button_pieces[1];
+        return $button;
 
     }
 
