@@ -54,7 +54,7 @@ class Service extends AbstractService
     public function bootstrapClasses($formHtml)
     {
         if (preg_match("/class='[^']*gform_validation_error[^']*'/", $formHtml)) {
-            preg_match_all("/class='(gfield [^']+)'/", $formHtml, $gFields);
+            preg_match_all('/class="(gfield [^"]+)"/', $formHtml, $gFields);
 
             if (!empty($gFields[0])) {
                 foreach ($gFields[0] as $gFieldIndex => $gField) {
