@@ -51,18 +51,14 @@ class Service extends AbstractService
         return $field_container;
     }
 
-    /**
-     * @param string $formHtml
-     * @return string
-     */
     public function bootstrapClasses($formHtml)
     {
         if (preg_match("/class='[^']*gform_validation_error[^']*'/", $formHtml)) {
-            preg_match_all('/class="(gfield [^"]+)"/', $formHtml, $gFields);
+            preg_match_all("/class='(gfield [^']+)'/", $formHtml, $gFields);
 
             if (!empty($gFields[0])) {
                 foreach ($gFields[0] as $gFieldIndex => $gField) {
-                    $class = ' is-valid';
+                    $class = " is-valid";
 
                     if (strpos($gFields[1][$gFieldIndex], 'gfield_error') !== false) {
                         $class = ' is-invalid';
@@ -71,22 +67,34 @@ class Service extends AbstractService
                     $formHtml = str_replace($gField, "class='" . $gFields[1][$gFieldIndex] . $class . "'", $formHtml);
                 }
             }
+
         }
 
         return $formHtml;
     }
 
-    public function fieldBootstrapClasses($fieldContent, $field, $value, $unknown, $formId)
+    /**
+     * @param string $fieldContent
+     * @param object $field
+     * @param string $value
+     * @param int $entryId
+     * @param int $formId
+     * @return string
+     */
+    public function fieldBootstrapClasses($fieldContent, $field, $value, $entryId, $formId)
     {
         if (strpos($fieldContent, '<select') !== false) {
             preg_match_all('/<select[^>]+>/', $fieldContent, $selectTags);
 
             if (!empty($selectTags[0])) {
                 foreach ($selectTags[0] as $selectTag) {
-                    $fieldContent = str_replace($selectTag, preg_replace("/class='([^']+)'/", "class='$1 custom-select'", $selectTag), $fieldContent);
+                    if (strpos($selectTag, 'class=') !== false) {
+                        $fieldContent = str_replace($selectTag, preg_replace("/class='([^']+)'/", "class='$1 custom-select'", $selectTag), $fieldContent);
+                    } else {
+                        $fieldContent = str_replace($selectTag, str_replace('<select', '<select class="custom-select"', $selectTag), $fieldContent);
+                    }
                 }
             }
-
         }
 
         if (preg_match("/type='(radio|checkbox)'/", $fieldContent)) {
@@ -95,8 +103,8 @@ class Service extends AbstractService
             if (!empty($radioTags[0])) {
                 foreach ($radioTags[0] as $radioIndex => $radioTag) {
                     $inputField = $radioTag;
-                    $inputField = str_replace('<input', "<input class='custom-control-input'", $inputField);
-                    $inputField = str_replace('<label', "<label class='custom-control-label'", $inputField);
+                    $inputField = str_replace("<input", "<input class='custom-control-input'", $inputField);
+                    $inputField = str_replace("<label", "<label class='custom-control-label'", $inputField);
 
                     $fieldContent = str_replace($radioTag, '<div class="custom-control custom-' . $radioTags[2][$radioIndex] . '">' . $inputField . '</div>', $fieldContent);
                 }
@@ -132,9 +140,9 @@ class Service extends AbstractService
 
     public static function inputToButton($button_input, $form)
     {
-        preg_match('/<input([^\/>]*)(\s\/)*>/', $button_input, $button_match);
+        preg_match("/<input([^\/>]*)(\s\/)*>/", $button_input, $button_match);
 
-        $button_atts = str_replace("value='" . $form['button']['text'] . "' ", '', $button_match[1]);
+        $button_atts = str_replace("value='" . $form['button']['text'] . "' ", "", $button_match[1]);
 
         return '<button ' . $button_atts . '>' . $form['button']['text'] . '</button>';
     }
