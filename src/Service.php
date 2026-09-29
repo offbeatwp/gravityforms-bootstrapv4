@@ -140,7 +140,19 @@ class Service extends AbstractService
 
     public static function inputToButton($button_input, $form)
     {
+        // Gravity Forms V3+ already renders the submit button as a <button> element.
+        // If the markup is already a <button>, the legacy <input> conversion below would rebuild
+        // `<button >{text}</button>` with every attribute stripped, so pass it through unchanged.
+        if (str_contains($button_input, '<button')) {
+            return $button_input;
+        }
+
         preg_match("/<input([^\/>]*)(\s\/)*>/", $button_input, $button_match);
+
+        // No <input> tag was found either — bail out instead of rebuilding an empty <button>.
+        if (!$button_match) {
+            return $button_input;
+        }
 
         $button_atts = str_replace("value='" . $form['button']['text'] . "' ", "", $button_match[1]);
 
